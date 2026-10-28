@@ -1,0 +1,31 @@
+name: Export Airtable Snapshot
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    if: github.event.issue.title == '[EXPORT] Airtable snapshot'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Export Airtable snapshot
+        env:
+          AIRTABLE_TOKEN: ${{ secrets.AIRTABLE_TOKEN }}
+          AIRTABLE_BASE_ID: appzNZgfYlDQnSZqG
+        run: node scripts/export-airtable-snapshot.mjs
+      - name: Upload private snapshot artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: airtable-job-hunt-snapshot
+          path: snapshot/airtable_job_hunt_snapshot.json
+          retention-days: 1
+          if-no-files-found: error
